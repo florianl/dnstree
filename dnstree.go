@@ -31,15 +31,12 @@ func (t *tree) insert(dns []rune, rank int) error {
 	lr := len(dns)
 
 	if branch, ok := t.branches[dns[0]]; ok {
-		if lr == 1 {
-			if branch.rank == -1 {
-				branch.rank = rank
-				return nil
-			} else {
-				return fmt.Errorf("Element already exists")
-			}
+		if lr == 1 && branch.rank != -1 {
+			return fmt.Errorf("Element already exists")
 		}
-		branch.insert(dns[1:], rank)
+		if lr > 1 {
+			return branch.insert(dns[1:], rank)
+		}
 	} else {
 		var branch = new(tree)
 		branch.branches = make(map[rune]*tree)
@@ -48,18 +45,16 @@ func (t *tree) insert(dns []rune, rank int) error {
 			branch.rank = rank
 		} else {
 			branch.rank = -1
-			branch.insert(dns[1:], rank)
+			return branch.insert(dns[1:], rank)
 		}
-
 	}
-
 	return nil
 }
 
 // Insert a dns element in the tree
-func Insert(dns string, rank int) {
+func Insert(dns string, rank int) error {
 	runes := reverse(dns)
-	root.insert(runes, rank)
+	return root.insert(runes, rank)
 }
 
 func (t *tree) search(dns []rune) (int, error) {
